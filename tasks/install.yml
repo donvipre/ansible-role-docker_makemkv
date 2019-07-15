@@ -1,0 +1,41 @@
+---
+# install.yml tasks file for ansible-role-docker_makemkv
+
+- name: Pull makemkv image
+  docker_image:
+    name: "{{ makemkv_image }}"
+    source: pull
+
+- name: Create network for MakeMKV
+  docker_network:
+    name: "{{ makemkv_network }}"
+    internal: yes
+    ipam_config:
+      - subnet: "{{ makemkv_iprange }}"
+
+- name: Start MakeMKV
+  docker_container:
+    name: "{{ makemkv_name }}"
+    image: "{{ makemkv_image }}"
+    state: started
+    volumes: "{{ makemkv_volumes }}"
+    devices: "{{ makemkv_devices }}"
+    published_ports: "{{ makemkv_published_ports }}"
+    env:
+      TZ: "{{ makemkv_timezone }}"
+      DISPLAY_WIDTH: "{{ makemkv_display_width }}"
+      DISPLAY_HEIGHT: "{{ makemkv_display_height }}"
+
+- name: Add MakeMKV container to network
+  docker_network:
+    name: "{{ makemkv_network }}"
+    connected:
+      - "{{ makemkv_name }}"
+    appends: yes
+
+- name: Remove MakeMKV container from bridge network
+  docker_container:
+    name: "{{ makemkv_name }}"
+    networks:
+      - name: "{{ makemkv_network }}"
+    purge_networks: yes
