@@ -1,0 +1,7 @@
+---
+# uninstall.yml tasks file for ansible-role-docker_makemkv
+
+- name: Remove MakeMKV container
+  docker_container:
+    name: "{{ makemkv_name }}"
+    state: absent
